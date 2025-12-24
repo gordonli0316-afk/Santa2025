@@ -3,42 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>3D 梦幻圣诞树</title>
+    <title>2025 Cyberpunk Christmas Tree</title>
     <link rel="stylesheet" href="style.css">
+    
     <script type="importmap">
         {
             "imports": {
-                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+                "three": "https://npm.elemecdn.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://npm.elemecdn.com/three@0.160.0/examples/jsm/"
             }
         }
     </script>
+    
+    <script src="https://code.bdstatic.com/npm/leancloud-storage@4.12.0/dist/av-min.js"></script>
 </head>
 <body>
     <div id="canvas-container"></div>
-
+    
     <div class="ui-container">
-        <div id="greeting-card" class="greeting-card">
-            <h1 id="greeting-title">Merry Christmas</h1>
-            <p id="greeting-message">送给你一片璀璨星河</p>
+        <div class="header">
+            <h1>MERRY CHRISTMAS</h1>
+            <p>Make a Wish · 共绘星河</p>
         </div>
 
-        <div class="controls-wrapper">
-            <div id="inputSection" class="input-box">
-                <input type="text" id="nameInput" placeholder="你的名字" maxlength="15">
-                <textarea id="msgInput" placeholder="写下你的祝福..." maxlength="40"></textarea>
-                <button id="generateBtn">生成专属祝福链接 🔗</button>
-                <p id="shareTip" class="tip">链接已复制，去分享吧！</p>
-            </div>
-            
-            <div id="createOwnSection" style="display: none;">
-                <button id="resetBtn" class="secondary-btn">我也要制作 ✏️</button>
-            </div>
+        <div class="input-wrapper">
+            <input type="text" id="wishInput" placeholder="写下愿望，发送弹幕 (所有人可见)..." maxlength="30">
+            <button id="sendBtn">发送 ✨</button>
         </div>
-        
-        <div class="footer">
-            拖拽旋转视角 • 滚轮缩放
-        </div>
+        <p class="status-bar" id="statusBar">正在连接许愿池...</p>
+    </div>
+
+    <div id="loader">
+        <div class="spinner"></div>
+        <p>正在点亮圣诞树...</p>
     </div>
 
     <script type="module" src="script.js"></script>
