@@ -2,34 +2,45 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的交互式圣诞树</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>3D 梦幻圣诞树</title>
     <link rel="stylesheet" href="style.css">
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+            }
+        }
+    </script>
 </head>
 <body>
-    <div class="main-container">
-        <h1>Merry Christmas!</h1>
-        
-        <div class="tree-wrapper" id="treeWrapper">
-            <div class="star">★</div>
-            <div class="tree-layer top"></div>
-            <div class="tree-layer middle"></div>
-            <div class="tree-layer bottom"></div>
-            <div class="trunk"></div>
-            <div id="lights-container"></div>
+    <div id="canvas-container"></div>
+
+    <div class="ui-container">
+        <div id="greeting-card" class="greeting-card">
+            <h1 id="greeting-title">Merry Christmas</h1>
+            <p id="greeting-message">送给你一片璀璨星河</p>
         </div>
 
-        <div class="controls">
-            <button id="toggleLightsBtn">开关灯光 💡</button>
-            <div class="color-picker">
-                <p>选择灯光颜色:</p>
-                <button class="color-btn" style="background-color: gold;" data-color="gold"></button>
-                <button class="color-btn" style="background-color: red;" data-color="red"></button>
-                <button class="color-btn" style="background-color: cyan;" data-color="cyan"></button>
-                <button class="color-btn multi-color" data-color="multi">彩色</button>
+        <div class="controls-wrapper">
+            <div id="inputSection" class="input-box">
+                <input type="text" id="nameInput" placeholder="你的名字" maxlength="15">
+                <textarea id="msgInput" placeholder="写下你的祝福..." maxlength="40"></textarea>
+                <button id="generateBtn">生成专属祝福链接 🔗</button>
+                <p id="shareTip" class="tip">链接已复制，去分享吧！</p>
+            </div>
+            
+            <div id="createOwnSection" style="display: none;">
+                <button id="resetBtn" class="secondary-btn">我也要制作 ✏️</button>
             </div>
         </div>
+        
+        <div class="footer">
+            拖拽旋转视角 • 滚轮缩放
+        </div>
     </div>
-    <script src="script.js"></script>
+
+    <script type="module" src="script.js"></script>
 </body>
 </html>
