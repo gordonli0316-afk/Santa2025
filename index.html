@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的交互式圣诞树</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="main-container">
+        <h1>Merry Christmas!</h1>
+        
+        <div class="tree-wrapper" id="treeWrapper">
+            <div class="star">★</div>
+            <div class="tree-layer top"></div>
+            <div class="tree-layer middle"></div>
+            <div class="tree-layer bottom"></div>
+            <div class="trunk"></div>
+            <div id="lights-container"></div>
+        </div>
+
+        <div class="controls">
+            <button id="toggleLightsBtn">开关灯光 💡</button>
+            <div class="color-picker">
+                <p>选择灯光颜色:</p>
+                <button class="color-btn" style="background-color: gold;" data-color="gold"></button>
+                <button class="color-btn" style="background-color: red;" data-color="red"></button>
+                <button class="color-btn" style="background-color: cyan;" data-color="cyan"></button>
+                <button class="color-btn multi-color" data-color="multi">彩色</button>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
