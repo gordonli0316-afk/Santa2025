@@ -1,188 +1,143 @@
 :root {
-    --tree-green: #0f5e0f;
-    --trunk-brown: #5c3a1e;
-    --bg-color: #1a1a2e;
-    /* 默认灯光颜色变量 */
-    --light-color: gold; 
-    --light-shadow: rgba(255, 215, 0, 0.7);
+    --glass-bg: rgba(255, 255, 255, 0.1);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --text-glow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-body {
+body, html {
     margin: 0;
     padding: 0;
-    background-color: var(--bg-color);
-    color: white;
-    font-family: 'Arial', sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    text-align: center;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* 防止滚动条 */
+    font-family: 'Segoe UI', sans-serif;
+    background-color: #050505; /* 深黑背景，防止加载时闪白 */
 }
 
-.main-container {
-    padding: 20px;
-}
-
-h1 {
-    color: #ff6b6b;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-    margin-bottom: 30px;
-}
-
-/* --- 圣诞树结构绘制 --- */
-.tree-wrapper {
-    position: relative;
-    width: 300px;
-    height: 400px;
-    margin: 0 auto;
-    /* 用于定位灯光 */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.star {
-    color: gold;
-    font-size: 50px;
-    position: absolute;
-    top: -25px;
-    z-index: 10;
-    text-shadow: 0 0 10px gold;
-    animation: starTwinkle 1.5s infinite alternate;
-}
-
-.tree-layer {
-    width: 0;
-    height: 0;
-    border-left: solid transparent;
-    border-right: solid transparent;
-    border-bottom: solid var(--tree-green);
-    position: absolute;
-    z-index: 2;
-}
-
-.top {
-    border-left-width: 60px;
-    border-right-width: 60px;
-    border-bottom-width: 80px;
-    top: 20px;
-}
-
-.middle {
-    border-left-width: 80px;
-    border-right-width: 80px;
-    border-bottom-width: 100px;
-    top: 70px;
-}
-
-.bottom {
-    border-left-width: 100px;
-    border-right-width: 100px;
-    border-bottom-width: 120px;
-    top: 130px;
-}
-
-.trunk {
-    width: 40px;
-    height: 60px;
-    background-color: var(--trunk-brown);
-    position: absolute;
-    top: 250px;
-}
-
-/* --- 灯光样式 --- */
-#lights-container {
+#canvas-container {
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: 5;
-    pointer-events: none; /* 让点击事件穿透灯光层 */
+    z-index: 1;
 }
 
-.light {
+/* UI 层悬浮在 Canvas 之上 */
+.ui-container {
     position: absolute;
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-    background-color: var(--light-color);
-    box-shadow: 0 0 10px var(--light-shadow);
-    /* 默认启动动画 */
-    animation: twinkle 1s infinite alternate;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 2;
+    pointer-events: none; /* 让鼠标事件穿透 UI 层，从而可以拖拽 3D 场景 */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
 }
 
-/* 当灯光关闭时添加的类 */
-.lights-off .light {
-    background-color: #444 !important;
-    box-shadow: none !important;
-    animation: none !important;
+/* 让这部分 UI 恢复鼠标响应 */
+.input-box, .greeting-card, button, input, textarea {
+    pointer-events: auto; 
 }
 
-/* 彩色模式的特殊处理 */
-.multi-color-mode .light:nth-child(3n) { --light-color: red; --light-shadow: rgba(255, 0, 0, 0.7); }
-.multi-color-mode .light:nth-child(3n+1) { --light-color: gold; --light-shadow: rgba(255, 215, 0, 0.7); }
-.multi-color-mode .light:nth-child(3n+2) { --light-color: cyan; --light-shadow: rgba(0, 255, 255, 0.7); }
-
-
-/* --- 动画 --- */
-@keyframes twinkle {
-    0% { opacity: 0.4; transform: scale(0.8); }
-    100% { opacity: 1; transform: scale(1.2); }
+/* 顶部祝福卡片 */
+.greeting-card {
+    text-align: center;
+    margin-top: 10vh;
+    color: white;
+    text-shadow: var(--text-glow);
+    animation: fadeIn 2s ease-out;
 }
 
-@keyframes starTwinkle {
-    0% { transform: scale(1); opacity: 0.8; }
-    100% { transform: scale(1.1); opacity: 1; text-shadow: 0 0 20px gold; }
+.greeting-card h1 {
+    font-size: 3rem;
+    margin: 0;
+    font-weight: 300;
+    letter-spacing: 2px;
 }
 
-/* --- 控制面板 --- */
-.controls {
-    margin-top: 40px;
-    background: rgba(255, 255, 255, 0.1);
+.greeting-card p {
+    font-size: 1.2rem;
+    color: #aaddff;
+    margin-top: 10px;
+    font-style: italic;
+}
+
+/* 底部控制区 */
+.controls-wrapper {
+    margin-bottom: 20px;
+    width: 90%;
+    max-width: 350px;
+}
+
+.input-box {
+    background: var(--glass-bg);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     padding: 20px;
-    border-radius: 15px;
+    border-radius: 16px;
+    border: 1px solid var(--glass-border);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: transform 0.3s;
+}
+
+input, textarea {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid var(--glass-border);
+    border-radius: 8px;
+    padding: 10px;
+    color: white;
+    font-family: inherit;
+    outline: none;
 }
 
 button {
-    cursor: pointer;
-    padding: 10px 20px;
+    background: linear-gradient(135deg, #00c6ff, #0072ff);
     border: none;
-    border-radius: 5px;
-    font-size: 16px;
-    transition: transform 0.2s;
+    padding: 10px;
+    color: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: opacity 0.3s;
 }
 
 button:hover {
-    transform: scale(1.05);
+    opacity: 0.9;
 }
 
-#toggleLightsBtn {
-    background-color: #ff6b6b;
-    color: white;
-    margin-bottom: 20px;
+.secondary-btn {
+    background: transparent;
+    border: 1px solid white;
+    width: 100%;
 }
 
-.color-picker p {
-    margin: 10px 0;
+.tip {
+    font-size: 0.8rem;
+    color: #4eff4e;
+    text-align: center;
+    margin: 0;
+    display: none;
 }
 
-.color-btn {
-    width: 30px;
-    height: 30px;
-    border-radius: 50%;
-    padding: 0;
-    margin: 0 5px;
-    border: 2px solid white;
+.footer {
+    color: rgba(255,255,255,0.4);
+    font-size: 0.8rem;
+    margin-bottom: 10px;
 }
 
-.multi-color {
-    width: auto;
-    height: auto;
-    padding: 5px 10px;
-    border-radius: 5px;
-    background: linear-gradient(45deg, red, gold, cyan);
-    color: #1a1a2e;
-    font-weight: bold;
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 600px) {
+    .greeting-card h1 { font-size: 2rem; }
+    .greeting-card { margin-top: 5vh; }
 }
