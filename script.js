@@ -5,7 +5,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
 
-// 1. 数据库配置
+// 1. 数据库配置 (沿用你之前的ID，或者去LeanCloud新建一个)
 const APP_ID = 'xqMFNTLCFpv0XoLWN8Cu5kSw-MdYXbMMI';
 const APP_KEY = '0Fr4MZwyJSBpC2UaYGTDbI3l';
 const SERVER_URL = "https://xqmfntlc.api.lncldglobal.com";
@@ -17,25 +17,26 @@ try {
     if (window.AV) {
         AV.init({ appId: APP_ID, appKey: APP_KEY, serverURL: SERVER_URL });
         isDbConnected = true;
-        statusBar.innerText = "已连接到全网许愿池 🟢";
+        statusBar.innerText = "已连接到极光许愿池 🟢";
         console.log("LeanCloud Connected");
     }
 } catch (e) {
-    console.error("DB Init Error:", e);
-    statusBar.innerText = "网络连接异常，进入离线模式 🔴";
+    console.error(e);
+    statusBar.innerText = "离线模式 ⚪";
 }
 
 // 2. 场景初始化
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x000000, 0.03); 
+// 冰蓝色的雾，模拟极光环境
+scene.fog = new THREE.FogExp2(0x051020, 0.02); 
 
 const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 100);
-camera.position.set(0, 4, 14);
+camera.position.set(0, 2, 16); // 视角稍微放低，仰视
 
 const renderer = new THREE.WebGLRenderer({ antialias: false, powerPreference: "high-performance" });
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-renderer.toneMapping = THREE.ReinhardToneMapping;
+renderer.toneMapping = THREE.CineonToneMapping; // 电影感色调
 document.getElementById('canvas-container').appendChild(renderer.domElement);
 
 const labelRenderer = new CSS2DRenderer();
@@ -48,154 +49,181 @@ document.getElementById('canvas-container').appendChild(labelRenderer.domElement
 const controls = new OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
 controls.autoRotate = true;
-controls.autoRotateSpeed = 0.8;
-controls.maxDistance = 25;
-controls.minDistance = 2;
-controls.maxPolarAngle = Math.PI / 2 - 0.1;
+controls.autoRotateSpeed = 0.5;
+controls.maxDistance = 20;
+controls.minDistance = 5;
+controls.maxPolarAngle = Math.PI / 1.8; // 禁止看到底部
 
-// 3. 辉光特效
+// 3. 辉光特效 (冷色调)
 const renderScene = new RenderPass(scene, camera);
 const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.5, 0.4, 0.85);
-bloomPass.threshold = 0.15; 
-bloomPass.strength = 1.8;   
-bloomPass.radius = 0.8;
+bloomPass.threshold = 0.2;
+bloomPass.strength = 1.5; // 强度适中
+bloomPass.radius = 0.5;
 
 const composer = new EffectComposer(renderer);
 composer.addPass(renderScene);
 composer.addPass(bloomPass);
 
-// 4. 创建 3D 圣诞树
+// 4. 创建 "冰晶树" (Crystal Tree)
 const treeGroup = new THREE.Group();
 scene.add(treeGroup);
 
-const grid = new THREE.GridHelper(50, 50, 0x333333, 0x111111);
-grid.position.y = -5;
+// 地面反射网格 (淡蓝色)
+const grid = new THREE.GridHelper(60, 60, 0x004488, 0x001122);
+grid.position.y = -6;
 scene.add(grid);
 
-// 螺旋主体
-const spiralGeo = new THREE.BufferGeometry();
-const spiralCount = 3500;
+// A. 树体：圆锥体内部的随机粒子云
+const crystalGeo = new THREE.BufferGeometry();
+const crystalCount = 5000;
 const posArray = [];
 const colArray = [];
-const colorTop = new THREE.Color('#00ffaa'); 
-const colorBottom = new THREE.Color('#ff0055'); 
+const colorIce = new THREE.Color('#e0f7fa');   // 冰白
+const colorAurora = new THREE.Color('#00ffff'); // 青光
+const colorPurple = new THREE.Color('#aa00ff'); // 紫光
 
-for(let i=0; i<spiralCount; i++) {
-    const t = i / spiralCount; 
-    const angle = t * 40; 
-    const radius = (1-t) * 5; 
-    const y = t * 11 - 5; 
+for(let i=0; i<crystalCount; i++) {
+    // 圆锥体随机分布算法
+    // 高度 y 从 -6 到 6 (总高12)
+    const y = (Math.random() * 12) - 6; 
+    // 半径随高度变化: 底部宽(5), 顶部尖(0)
+    // 归一化高度 h: 0(底) -> 1(顶)
+    const h = (y + 6) / 12; 
+    const maxRadius = (1 - h) * 5;
     
-    const x = Math.cos(angle) * radius;
-    const z = Math.sin(angle) * radius;
+    // 在圆内随机分布
+    const r = maxRadius * Math.sqrt(Math.random()); 
+    const theta = Math.random() * Math.PI * 2;
     
-    posArray.push(x + (Math.random()-0.5)*0.3, y, z + (Math.random()-0.5)*0.3);
+    const x = r * Math.cos(theta);
+    const z = r * Math.sin(theta);
     
-    const mixedColor = colorBottom.clone().lerp(colorTop, t);
+    posArray.push(x, y, z);
+
+    // 颜色混合：底部青色，顶部紫色/白色
+    const mixedColor = colorAurora.clone().lerp(colorPurple, h).lerp(colorIce, Math.random()*0.5);
     colArray.push(mixedColor.r, mixedColor.g, mixedColor.b);
 }
 
-spiralGeo.setAttribute('position', new THREE.Float32BufferAttribute(posArray, 3));
-spiralGeo.setAttribute('color', new THREE.Float32BufferAttribute(colArray, 3));
+crystalGeo.setAttribute('position', new THREE.Float32BufferAttribute(posArray, 3));
+crystalGeo.setAttribute('color', new THREE.Float32BufferAttribute(colArray, 3));
 
-const spiralMat = new THREE.PointsMaterial({
-    size: 0.12,
+const crystalMat = new THREE.PointsMaterial({
+    size: 0.15,
     vertexColors: true,
     transparent: true,
-    opacity: 0.9,
+    opacity: 0.8,
     blending: THREE.AdditiveBlending,
     depthWrite: false
 });
-treeGroup.add(new THREE.Points(spiralGeo, spiralMat));
+const treeMesh = new THREE.Points(crystalGeo, crystalMat);
+treeGroup.add(treeMesh);
 
-// 装饰彩球
-const ornGeo = new THREE.BufferGeometry();
-const ornCount = 100;
-const ornPos = [];
-const ornCol = [];
-
-for(let i=0; i<ornCount; i++) {
-    const y = Math.random() * 11 - 5;
-    const t = (y+5)/11;
-    const radius = (1-t) * 5 + 0.5;
-    const angle = Math.random() * Math.PI * 2;
-    ornPos.push(Math.cos(angle)*radius, y, Math.sin(angle)*radius);
-    const c = Math.random() > 0.5 ? new THREE.Color(0xffaa00) : new THREE.Color(0xffffff);
-    ornCol.push(c.r, c.g, c.b);
+// B. 魔法光环 (Magic Rings)
+function createRing(radius, y, color) {
+    const points = [];
+    for (let i = 0; i < 120; i++) {
+        const angle = (i / 120) * Math.PI * 2;
+        points.push(new THREE.Vector3(Math.cos(angle)*radius, y, Math.sin(angle)*radius));
+    }
+    const geometry = new THREE.BufferGeometry().setFromPoints(points);
+    const material = new THREE.LineBasicMaterial({ color: color, transparent: true, opacity: 0.5 });
+    const ring = new THREE.LineLoop(geometry, material);
+    return ring;
 }
-ornGeo.setAttribute('position', new THREE.Float32BufferAttribute(ornPos, 3));
-ornGeo.setAttribute('color', new THREE.Float32BufferAttribute(ornCol, 3));
-treeGroup.add(new THREE.Points(ornGeo, new THREE.PointsMaterial({
-    size: 0.35, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false
-})));
 
-// 顶部星星 (不需要加载外部图片，直接用代码生成纹理)
-// 【修改点 3】 动态生成光晕 Canvas，无需加载外部 png
+const ring1 = createRing(3.5, -2, 0x00ffff);
+const ring2 = createRing(2.0, 2, 0xff00ff);
+// 让光环稍微倾斜
+ring1.rotation.x = 0.1;
+ring1.rotation.z = 0.1;
+ring2.rotation.x = -0.1;
+ring2.rotation.z = -0.1;
+
+treeGroup.add(ring1);
+treeGroup.add(ring2);
+
+// C. 漫天飞雪 (Falling Snow)
+const snowGeo = new THREE.BufferGeometry();
+const snowCount = 1000;
+const snowPos = [];
+const snowVel = []; // 速度
+
+for(let i=0; i<snowCount; i++) {
+    snowPos.push(
+        (Math.random() - 0.5) * 40, // 宽范围
+        (Math.random() * 20),       // 高度
+        (Math.random() - 0.5) * 40
+    );
+    snowVel.push((Math.random() * 0.05) + 0.02); // 下落速度
+}
+snowGeo.setAttribute('position', new THREE.Float32BufferAttribute(snowPos, 3));
+const snowMat = new THREE.PointsMaterial({
+    color: 0xffffff,
+    size: 0.1,
+    transparent: true,
+    opacity: 0.6
+});
+const snowMesh = new THREE.Points(snowGeo, snowMat);
+scene.add(snowMesh);
+
+// D. 顶部光芒
 function createGlowTexture() {
     const canvas = document.createElement('canvas');
     canvas.width = 32; canvas.height = 32;
     const ctx = canvas.getContext('2d');
     const gradient = ctx.createRadialGradient(16, 16, 0, 16, 16, 16);
-    gradient.addColorStop(0, 'rgba(255, 215, 0, 1)');
+    gradient.addColorStop(0, 'rgba(255, 255, 255, 1)');
     gradient.addColorStop(1, 'rgba(0, 0, 0, 0)');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, 32, 32);
     return new THREE.CanvasTexture(canvas);
 }
+const starSprite = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: createGlowTexture(),
+    color: 0xffffff,
+    blending: THREE.AdditiveBlending
+}));
+starSprite.position.set(0, 6.5, 0);
+starSprite.scale.set(3, 3, 1);
+treeGroup.add(starSprite);
 
-const starGeo = new THREE.SphereGeometry(0.25);
-const starMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-const star = new THREE.Mesh(starGeo, starMat);
-star.position.set(0, 6.2, 0);
-treeGroup.add(star);
-
-const spriteMat = new THREE.SpriteMaterial({ 
-    map: createGlowTexture(), // 使用动态生成的纹理
-    color: 0xffd700, 
-    transparent: true, 
-    blending: THREE.AdditiveBlending 
-});
-const sprite = new THREE.Sprite(spriteMat);
-sprite.scale.set(4, 4, 1);
-star.add(sprite);
-
-// 5. 弹幕逻辑
-const labels = [];
-
+// 5. 弹幕逻辑 (保持不变，只是样式变了)
 function createLabel(text) {
     const div = document.createElement('div');
     div.className = 'floating-label';
     div.textContent = text;
-    const hue = Math.floor(Math.random() * 360);
-    div.style.borderColor = `hsl(${hue}, 80%, 60%)`;
-    div.style.boxShadow = `0 0 15px hsl(${hue}, 80%, 60%, 0.3)`;
-
+    
     const label = new CSS2DObject(div);
     const angle = Math.random() * Math.PI * 2;
-    const radius = 4 + Math.random() * 3;
-    const yStart = -4 + Math.random() * 8;
+    // 弹幕分布在树的外围
+    const radius = 5 + Math.random() * 3; 
+    const yStart = -5 + Math.random() * 10;
     
     label.position.set(Math.cos(angle)*radius, yStart, Math.sin(angle)*radius);
-    label.userData = { speed: 0.005 + Math.random() * 0.01, yLimit: 7 };
+    label.userData = { speed: 0.003 + Math.random() * 0.005, yLimit: 8 };
     
     treeGroup.add(label);
-    labels.push(label);
-
+    
     setTimeout(() => { div.style.opacity = '1'; div.style.transform = 'scale(1)'; }, 100);
 }
 
+// 模拟假数据
+const fakeWishes = ["Peace", "Love", "Winter Magic", "Joy", "2025"];
+
 async function fetchWishes() {
     if(!isDbConnected) {
-        ["Merry Christmas", "暴富", "平安喜乐", "Happy 2025"].forEach(t => createLabel(t));
+        fakeWishes.forEach(t => createLabel(t));
         return;
     }
     try {
         const query = new AV.Query('Wishes');
         query.descending('createdAt');
-        query.limit(50);
+        query.limit(40);
         const results = await query.find();
         results.forEach(obj => { if(obj.get('text')) createLabel(obj.get('text')); });
-    } catch (error) { console.error("Fetch Error:", error); }
+    } catch (error) { console.error(error); }
 }
 
 async function sendWish() {
@@ -206,8 +234,8 @@ async function sendWish() {
     input.value = '';
     const btn = document.getElementById('sendBtn');
     const originalText = btn.innerText;
-    btn.innerText = "发送中...";
-    createLabel(text); // 本地立即显示
+    btn.innerText = "❄️";
+    createLabel(text); 
 
     if(isDbConnected) {
         try {
@@ -215,13 +243,9 @@ async function sendWish() {
             const wish = new WishObj();
             wish.set('text', text);
             await wish.save();
-            btn.innerText = "成功! ✅";
-        } catch (error) {
-            console.error("Save Error:", error);
-            btn.innerText = "失败 ❌";
-        }
+        } catch (error) { console.error(error); }
     }
-    setTimeout(() => btn.innerText = originalText, 2000);
+    setTimeout(() => btn.innerText = originalText, 1000);
 }
 
 document.getElementById('sendBtn').addEventListener('click', sendWish);
@@ -234,18 +258,40 @@ const clock = new THREE.Clock();
 const loader = document.getElementById('loader');
 
 fetchWishes();
-setTimeout(() => { loader.style.opacity = '0'; setTimeout(()=>loader.style.display='none', 800); }, 1500);
+setTimeout(() => { loader.style.opacity = '0'; setTimeout(()=>loader.style.display='none', 1000); }, 1500);
 
 function animate() {
     requestAnimationFrame(animate);
     const time = clock.getElapsedTime();
 
-    treeGroup.rotation.y = time * 0.1;
-    sprite.material.opacity = 0.6 + Math.sin(time*3)*0.3;
+    // 树整体缓慢旋转
+    treeMesh.rotation.y = -time * 0.1; // 反方向
+    
+    // 光环旋转
+    ring1.rotation.z = time * 0.2;
+    ring2.rotation.z = -time * 0.3;
 
-    labels.forEach(label => {
-        label.position.y += label.userData.speed;
-        if(label.position.y > label.userData.yLimit) label.position.y = -5;
+    // 顶部星光呼吸
+    starSprite.scale.setScalar(3 + Math.sin(time*2)*0.5);
+
+    // 雪花下落
+    const positions = snowMesh.geometry.attributes.position.array;
+    for(let i=0; i<snowCount; i++) {
+        // Y轴下移
+        positions[i*3 + 1] -= snowVel[i];
+        // 如果掉到底部，重置回顶部
+        if(positions[i*3 + 1] < -10) {
+            positions[i*3 + 1] = 10;
+        }
+    }
+    snowMesh.geometry.attributes.position.needsUpdate = true;
+
+    // 弹幕上升
+    treeGroup.children.forEach(child => {
+        if(child instanceof CSS2DObject && child.userData.speed) {
+            child.position.y += child.userData.speed;
+            if(child.position.y > child.userData.yLimit) child.position.y = -6;
+        }
     });
 
     controls.update();
