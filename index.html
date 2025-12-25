@@ -9,8 +9,8 @@
     <script type="importmap">
         {
             "imports": {
-                "three": "https://npm.elemecdn.com/three@0.160.0/build/three.module.js",
-                "three/addons/": "https://npm.elemecdn.com/three@0.160.0/examples/jsm/"
+                "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+                "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
             }
         }
     </script>
@@ -26,7 +26,7 @@
         </div>
 
         <div class="input-wrapper">
-            <input type="text" id="wishInput" placeholder="写下愿望，凝结成冰 (全网可见)..." maxlength="30">
+            <input type="text" id="wishInput" placeholder="写下愿望，凝结成冰..." maxlength="30">
             <button id="sendBtn">祈愿 ❄️</button>
         </div>
         <p class="status-bar" id="statusBar">正在连接极光...</p>
@@ -34,8 +34,16 @@
 
     <div id="loader">
         <div class="spinner"></div>
-        <p>正在凝聚冰晶...</p>
+        <p id="loading-text">正在凝聚冰晶...</p>
     </div>
+
+    <script>
+        window.onerror = function(msg, url, line) {
+            document.getElementById('loading-text').innerText = "加载出错，请刷新重试";
+            document.getElementById('loading-text').style.color = "red";
+            console.error("Global Error:", msg);
+        };
+    </script>
 
     <script type="module" src="script.js"></script>
 </body>
