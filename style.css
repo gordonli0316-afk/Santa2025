@@ -1,5 +1,3 @@
-/* 移除所有 @import，使用系统自带字体，确保秒开 */
-
 body, html {
     margin: 0;
     padding: 0;
@@ -7,9 +5,7 @@ body, html {
     height: 100%;
     overflow: hidden;
     background-color: #0b1026;
-    /* 深邃极光背景 */
     background: radial-gradient(circle at center, #1b2744 0%, #000000 100%);
-    /* 优先使用系统衬线字体，优雅且不卡顿 */
     font-family: 'Georgia', 'Times New Roman', 'Songti SC', serif;
 }
 
@@ -19,17 +15,16 @@ body, html {
     z-index: 1;
 }
 
-/* 冰晶弹幕样式 */
+/* 弹幕样式升级：支持显示两行文字 */
 .floating-label {
     color: #e0f7fa;
     font-size: 13px;
-    font-weight: bold;
-    background: rgba(255, 255, 255, 0.1);
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-    padding: 6px 12px;
-    border: 1px solid rgba(169, 236, 255, 0.3);
-    border-radius: 4px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    padding: 8px 14px;
+    border: 1px solid rgba(169, 236, 255, 0.4);
+    border-radius: 6px;
     pointer-events: none;
     user-select: none;
     text-shadow: 0 0 5px #00ffff;
@@ -37,7 +32,18 @@ body, html {
     opacity: 0;
     transform: scale(0.8);
     transition: opacity 0.8s, transform 0.8s;
-    box-shadow: 0 0 10px rgba(0, 255, 255, 0.1);
+    box-shadow: 0 0 15px rgba(0, 255, 255, 0.15);
+    text-align: center;
+    line-height: 1.4;
+}
+
+/* 名字的小字样式 */
+.label-name {
+    display: block;
+    font-size: 0.85em;
+    color: #88ccff;
+    margin-top: 2px;
+    font-weight: normal;
 }
 
 .ui-container {
@@ -80,13 +86,13 @@ body, html {
     pointer-events: auto;
     display: flex;
     gap: 0;
-    background: rgba(11, 26, 50, 0.7);
+    background: rgba(11, 26, 50, 0.8);
     border: 1px solid rgba(136, 204, 255, 0.3);
     padding: 5px;
     border-radius: 6px;
     box-shadow: 0 0 20px rgba(0, 100, 255, 0.2);
-    width: 85%;
-    max-width: 400px;
+    width: 90%;
+    max-width: 420px;
     margin-bottom: 10px;
     transition: transform 0.3s;
 }
@@ -97,14 +103,28 @@ body, html {
 }
 
 input {
-    flex: 1;
     background: transparent;
     border: none;
     color: #fff;
-    padding: 10px 15px;
+    padding: 10px;
     font-size: 15px;
     font-family: inherit;
     outline: none;
+}
+
+/* 名字输入框比较短 */
+.name-input {
+    flex: 0 0 70px; /* 固定宽度 */
+    text-align: center;
+    border-right: 1px solid rgba(136, 204, 255, 0.2);
+    padding-left: 5px;
+    padding-right: 5px;
+}
+
+/* 愿望输入框占据剩余空间 */
+.wish-input {
+    flex: 1;
+    padding-left: 15px;
 }
 
 input::placeholder { color: rgba(136, 204, 255, 0.5); }
@@ -113,12 +133,13 @@ button {
     background: linear-gradient(135deg, #0055ff, #00ccff);
     border: none;
     color: white;
-    padding: 8px 20px;
+    padding: 8px 15px;
     border-radius: 4px;
     cursor: pointer;
     font-family: inherit;
     font-weight: bold;
     transition: all 0.3s;
+    white-space: nowrap;
 }
 
 button:hover { 
